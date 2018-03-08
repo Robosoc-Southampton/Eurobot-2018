@@ -8,6 +8,7 @@
 #include "button.h"
 #include "myservo.h"
 #include "song.h"
+#include "PID.h"
 
 #define MD25ADDRESS         0x58                              // Address of the MD25
 #define SPEED1              0x00                              // Byte to send speed to both motors for forward and backwards motion if operated in MODE 2 or 3 and Motor 1 Speed if in MODE 0 or 1
