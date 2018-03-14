@@ -4,13 +4,12 @@
  * dh4n16@soton.ac.uk
  */
 
+#include "driver.h"
 
 
-#include "driver.h" //include the declaration for this class
-#include "MD25.h"
-
-
-Driver::Driver(float Pp, float Pi, float Pd, float Pp_t, float Pi_t, float Pd_t, int limit_correction, int limit_correction_turning, int circumference, float wheel_dist) { // constructor, PID constants
+Driver::Driver(UltraSonic *sensors, unsigned int sensorCount, float Pp, float Pi, float Pd, float Pp_t, float Pi_t, float Pd_t, int limit_correction, int limit_correction_turning, int circumference, float wheel_dist) { // constructor, PID constants
+	this->sensors = sensors;
+	this->sensorCount = sensorCount;
 	Kp = Pp;
 	Ki = Pi;
 	Kd = Pd;
@@ -29,41 +28,61 @@ Driver::Driver(float Pp, float Pi, float Pd, float Pp_t, float Pi_t, float Pd_t,
 	pi = 3.14159;
 	counter = 0;
 	error_sum = 0;
+
+	for (int i = 0; i < sensorCount; ++i) sensors[i].fillLastValues();
 }
 
 void Driver::setup() {
 	md->setup();
 }
 
-void Driver::forward(int dist, long timeout) {
+int Driver::forward(int dist, long timeout) {
 	md->encReset(); // reset encoders
 	delay(10);
 	int enc1, enc_target;
 	counter, error_sum = 0;
 	long start_time = millis();
- Serial.print("go forward ");
- Serial.println(dist);
+
 	do {
-    Serial.println("Here");
 		enc_target = getEncVal(dist); // get target value for encoders
-    Serial.println("Here1");
 		enc1 = md->encoder1(); // asign current value of encoder1 to var enc1
-    Serial.println("Here2");
 		calculatePid(enc1, enc_target); // calculate PID value and assign it to private var PID_speed_limited
-    Serial.println("Here3");
 		md->setSpeed(PID_speed_limited, PID_speed_limited);
-    Serial.println("Here4");
 		if (terminatePid()) {
 			break;
 		}
-		Serial.print("enc_target: ");
-		Serial.println(enc_target);
-		Serial.print("enc1: ");
-		Serial.println(enc1);
-		Serial.println();
+		else if (sensorCount == 2 && dist < 0 && sensors[1].allBelowThreshold(PROXIMITY_THRESHOLD)) {
+			// md->stopMotors();
+			// return getDistance(md->encoder1());
+		}
+		else if (dist > 0 && sensors[0].allBelowThreshold(PROXIMITY_THRESHOLD)) {
+			// md->stopMotors();
+			// return getDistance(md->encoder1());
+		}
 	} while((millis() - start_time) < timeout);
-//	} while(true);
+
 	md->stopMotors();
+	return getDistance(md->encoder1());
+}
+
+int Driver::forwardUntilLine(PololuQTRSensors sensor, long timeout) {
+	md->encReset(); // reset encoders
+	delay(10);
+	counter, error_sum = 0;
+	long start_time = millis();
+
+	do {
+		int speed = 255 - limit_cor;
+		md->setSpeed(speed, speed);
+		
+		if (senseLine(sensor)) {
+			break;
+		}
+	} while((millis() - start_time) < timeout);
+
+	md->stopMotors();
+
+	return getDistance(md->encoder1());
 }
 
 void Driver::turnAtSpot(float angle, long timeout) {
@@ -155,6 +174,23 @@ void Driver::printEnc() {
 
 
 // HELP FUNCTIONS
+
+bool Driver::senseLine(PololuQTRSensors sensor) {
+	unsigned int readings[3];
+	unsigned int threshold = 800;
+
+	sensor.readLine(readings);
+
+	for (int i = 0; i < 3; ++i) {
+		if (readings[i] > threshold) return true;
+	}
+
+	return false;
+}
+
+int Driver::getDistance(int enc_val) {
+	return int(enc_val / 360.f * cir);
+}
 
 int Driver::getEncVal(int dist) { // returns encoder value to be set to drive required distance
 	int enc_count = int(((float(dist)/cir) * 360));

@@ -35,15 +35,15 @@ void MD25::setup() {
 
 	Wire.beginTransmission(MD25ADDRESS); // Set MD25 operation MODE
 	Wire.write(MODE_SELECTOR);
-	Wire.write(_mode);                                           
+	Wire.write(_mode);
 	Wire.endTransmission();
-  delay(100);
+  	delay(100);
 
 	Wire.beginTransmission(MD25ADDRESS); // Set MD25 operation MODE
 	Wire.write(ACCELERATION);
 	Wire.write(_acceleration);                                           
 	Wire.endTransmission();
-  delay(100);
+  	delay(100);
 
 	encReset(); // Cals a function that resets the encoder values to 0 
 }

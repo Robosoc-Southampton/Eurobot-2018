@@ -14,17 +14,28 @@
 
 #include <Arduino.h>
 #include "MD25.h"
+#include "QTRSensors.h"
+#include "UltraSonic.h"
 
+const float PROXIMITY_THRESHOLD = 8.0;
 
 class Driver {
 public:
-	Driver(float Pp, float Pi, float Pd, float Pp_t, float Pi_t, float Pd_t, int limit_correction, int limit_correction_turning, int circumference, float wheel_dist); // constructor
+	// sensorCount should be either 1 or 2
+	// if sensorCount is 1, sensors[1] should be a rear sensor
+	// sensors[0] should always be a front sensor
+	Driver(UltraSonic *sensors, unsigned int sensorCount, float Pp, float Pi, float Pd, float Pp_t, float Pi_t, float Pd_t, int limit_correction, int limit_correction_turning, int circumference, float wheel_dist); // constructor
 	/* Pp, Pi, Pd, Pp_t, Pi_t, Pd_t: PID constants, limit_correction and limit_correction_turing: limits max speed of the motors for going straight and turning at spot respectively,
 	 * circumference: circumference of the wheel, wheel_dist: distance between the wheels */
 	void setup(); // calls setup from md25.h to start the serial communication, set acceleration and reset encoders
-	void forward(int dist, long timeout=5000); // drives forward using PID and help functions below
+	int forward(int dist, long timeout=5000); // drives forward using PID and help functions below
+	// unsafe (won't stop using ultrasonic sensors):
+	int forwardUntilLine(PololuQTRSensors sensor, long timeout=5000); // drives forward until hitting a line
 	void turnAtSpot(float angle, long timeout=5000); // turns at spot until it reaches required angle (positive clockwise) using PID and help functions
 	void turn(int rad, int angle, char side, long timeout=5000); // drives on arc with specified parametres
+
+	bool senseLine(PololuQTRSensors sensor); // returns true if the line sensor detects a line
+	int getDistance(int enc_val); // return the distance travelled using the encoder value
 
 	// DEBUG FUCNTIONS
 	void printPid(); // prints current PID values and error
@@ -42,6 +53,8 @@ public:
 	float pi;
 
 private:
+	UltraSonic *sensors;
+	unsigned int sensorCount;
 	float Kp; // constants for PID
 	float Ki;
 	float Kd;

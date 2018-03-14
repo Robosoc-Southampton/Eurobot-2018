@@ -10,6 +10,7 @@
 #include "song.h"
 #include "PID.h"
 #include "QTRSensors.h"
+#include "UltraSonic.h"
 
 #define MD25ADDRESS         0x58                              // Address of the MD25
 #define SPEED1              0x00                              // Byte to send speed to both motors for forward and backwards motion if operated in MODE 2 or 3 and Motor 1 Speed if in MODE 0 or 1
@@ -34,37 +35,47 @@ int circumference = 321; // [mm]
 int wheel_dist = 230; // [mm] initialy 235
 
 // create objects
-MD25 md(0);
-Driver driver(Pp, Pi, Pd, Pp_t, Pi_t, Pd_t, limit_correction, limit_correction_turning, circumference, wheel_dist);
+const unsigned int SENSOR_COUNT = 1;
 
-PololuQTRSensorsRC qtr((char[]) { 15, 16, 17 }, 3);
+UltraSonic distanceSensor(2, 3);
+UltraSonic distanceSensors[SENSOR_COUNT] = {distanceSensor};
+
+Driver driver(distanceSensors, SENSOR_COUNT, Pp, Pi, Pd, Pp_t, Pi_t, Pd_t, limit_correction, limit_correction_turning, circumference, wheel_dist);
+
+PololuQTRSensorsRC qtr((char[]) {14, 15, 16}, 3);
 
 void setup() {
 	Serial.begin(9600); // start serial commuication
 	Serial.println("starting set up");
 
 	driver.setup(); // start I2C, setup MD25 to mode 0
-	delay(100);
+
+	Serial.println("calibrating qtr");
 
 	for (int i = 0; i < 250; ++i) {
-		qtr.calibrate();
-		delay(20);
+		// qtr.calibrate();
+		// delay(20);
 	}
 
 	Serial.println("set up done");
 }
 
 void loop() {
-	unsigned int sensors[3];
-	int position = qtr.readLine(sensors);
+	int dist = driver.forward(300);
 
-	for (int i = 0; i < 3; ++i) {
-		Serial.print(sensors[i]);
-		Serial.print("\t");
+	while (true) {
+		unsigned int sensors[3];
+		int position = qtr.readLine(sensors);
+
+		for (int i = 0; i < 3; ++i) {
+			Serial.print(sensors[i]);
+			Serial.print(" ");
+		}
+
+		Serial.print(distanceSensor.getValue());
+		Serial.print(" ");
+		Serial.print(dist);
+
+		Serial.println();
 	}
-
-	Serial.println();
-
-	delay(50);
-	// driver.forward(428);
 }
