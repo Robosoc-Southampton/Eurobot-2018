@@ -31,8 +31,8 @@ const float Pd_t = 0;
 int limit_correction = 70; // (min value of 15)
 int limit_correction_turning = 90;
 
-int circumference = 321; // [mm]
-int wheel_dist = 230; // [mm] initialy 235
+int circumference = 314; // [mm]
+int wheel_dist = 225; // [mm] initialy 235
 
 // create objects
 const unsigned int SENSOR_COUNT = 1;
@@ -73,7 +73,12 @@ void setup() {
 }
 
 void loop() {
-  int dist = driver.forward(300);
+  // int dist = driver.forward(300);
+
+  driver.turnAtSpot(15.0);
+
+  delay(300);
+  driver.turnAtSpot(-90.0);
 
   while (!startButton.state()) {
     Serial.println("Waiting for button");
@@ -91,11 +96,6 @@ void loop() {
       // Serial.print(sensors[i]);
       // Serial.print(" ");
     }
-
-    Serial.print(distanceSensor.getValue());
-
-    // Serial.print(" ");
-    // Serial.print(dist);
 
     Serial.println();
   }

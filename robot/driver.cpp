@@ -96,13 +96,20 @@ void Driver::turnAtSpot(float angle, long timeout) {
 	int enc1, enc_target = 0;
 	counter, error_sum = 0;
 	long start_time = millis();
+  Serial.print("Arc: ");
+  Serial.println(arc);
 	do {
-		enc_target = getEncVal(dist); // get target value for encoders
+		enc_target = -getEncVal(dist); // get target value for encoders
+    Serial.print("Angle to turn by: ");
+    Serial.println(enc_target);
 		enc1 = md->encoder1();
 		calculatePidTurn(enc1, enc_target);
 		int spd1 = PID_speed_limited;
+    Serial.print("Wheel speed: ");
+    Serial.println(spd1);
 		int spd2 = 128 - (spd1 - 128);
-		md->setSpeed(spd1, spd2);
+    printEnc();
+		md->setSpeed(spd2, spd1);
 		if (terminatePid()) {
 			break;
 		}
