@@ -33,7 +33,7 @@ float UltraSonic::getValue() {
 }
 
 bool UltraSonic::allBelowThreshold(float threshold) {
-	for (auto idx = 0; idx < readings; ++idx) {
+	for (int idx = 0; idx < MAX_VALUES; ++idx) {
 		if (lastValues[idx] > threshold) return false;
 	}
 

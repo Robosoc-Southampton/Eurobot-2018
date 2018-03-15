@@ -1,7 +1,7 @@
 /* This is a high level code for the odometry assignment at University of Southamampton, Nov 2017. It was written by Daniel Hausner and debugged with a help of team members,
- * namely Georgios Hadjigeorgiou, Taiwo Tony Khourie, Shadi Hamou and Bethany Harding.
- * dh4n16@soton.ac.uk
- */
+   namely Georgios Hadjigeorgiou, Taiwo Tony Khourie, Shadi Hamou and Bethany Harding.
+   dh4n16@soton.ac.uk
+*/
 #include "LED.h"
 #include "MD25.h"
 #include "driver.h"
@@ -37,45 +37,66 @@ int wheel_dist = 230; // [mm] initialy 235
 // create objects
 const unsigned int SENSOR_COUNT = 1;
 
+Button startButton(4);
+
 UltraSonic distanceSensor(2, 3);
 UltraSonic distanceSensors[SENSOR_COUNT] = {distanceSensor};
 
 Driver driver(distanceSensors, SENSOR_COUNT, Pp, Pi, Pd, Pp_t, Pi_t, Pd_t, limit_correction, limit_correction_turning, circumference, wheel_dist);
 
-PololuQTRSensorsRC qtr((char[]) {14, 15, 16}, 3);
+// PololuQTRSensorsRC qtr((char[]) {14, 15, 16}, 3);
 
 void setup() {
-	Serial.begin(9600); // start serial commuication
-	Serial.println("starting set up");
+  Serial.begin(9600); // start serial commuication
+  Serial.println("starting set up");
 
-	driver.setup(); // start I2C, setup MD25 to mode 0
+  driver.setup(); // start I2C, setup MD25 to mode 0
 
-	Serial.println("calibrating qtr");
+  Serial.println("calibrating qtr");
 
-	for (int i = 0; i < 250; ++i) {
-		// qtr.calibrate();
-		// delay(20);
-	}
+  for (int i = 0; i < 250; ++i) {
+    // qtr.calibrate();
+    // delay(20);
+  }
 
-	Serial.println("set up done");
+  Serial.println("set up done");
+  
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  while (!startButton.state()) {
+    Serial.println("Waiting for button");
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(300);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(300);
+  }
 }
 
 void loop() {
-	int dist = driver.forward(300);
+  int dist = driver.forward(300);
 
-	while (true) {
-		unsigned int sensors[3];
-		int position = qtr.readLine(sensors);
+  while (!startButton.state()) {
+    Serial.println("Waiting for button");
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(300);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(300);
+  }
 
-		for (int i = 0; i < 3; ++i) {
-			Serial.print(sensors[i]);
-			Serial.print(" ");
-		}
+  while (false) {
+    // unsigned int sensors[3];
+    // int position = qtr.readLine(sensors);
 
-		Serial.print(distanceSensor.getValue());
-		Serial.print(" ");
-		Serial.print(dist);
+    for (int i = 0; i < 3; ++i) {
+      // Serial.print(sensors[i]);
+      // Serial.print(" ");
+    }
 
-		Serial.println();
-	}
+    Serial.print(distanceSensor.getValue());
+
+    // Serial.print(" ");
+    // Serial.print(dist);
+
+    Serial.println();
+  }
 }

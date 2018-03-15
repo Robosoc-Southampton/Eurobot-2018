@@ -48,16 +48,19 @@ int Driver::forward(int dist, long timeout) {
 		enc1 = md->encoder1(); // asign current value of encoder1 to var enc1
 		calculatePid(enc1, enc_target); // calculate PID value and assign it to private var PID_speed_limited
 		md->setSpeed(PID_speed_limited, PID_speed_limited);
-		if (terminatePid()) {
-			break;
+   
+		if (terminatePid()) break;
+
+    sensors[0].getValue();
+    if (sensorCount == 2) sensors[1].getValue();
+    
+		if (sensorCount == 2 && dist < 0 && sensors[1].allBelowThreshold(PROXIMITY_THRESHOLD)) {
+			md->stopMotors();
+			return getDistance(md->encoder1());
 		}
-		else if (sensorCount == 2 && dist < 0 && sensors[1].allBelowThreshold(PROXIMITY_THRESHOLD)) {
-			// md->stopMotors();
-			// return getDistance(md->encoder1());
-		}
-		else if (dist > 0 && sensors[0].allBelowThreshold(PROXIMITY_THRESHOLD)) {
-			// md->stopMotors();
-			// return getDistance(md->encoder1());
+		if (dist > 0 && sensors[0].allBelowThreshold(PROXIMITY_THRESHOLD)) {
+			md->stopMotors();
+			return getDistance(md->encoder1());
 		}
 	} while((millis() - start_time) < timeout);
 
