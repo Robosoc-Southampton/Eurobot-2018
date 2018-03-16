@@ -1,7 +1,8 @@
 #include "Navigator.h"
 
-Navigator::Navigator(Driver *driver, int x, int y, float heading, int xLength, int yLength) {
+Navigator::Navigator(Driver *driver, UltraSonic *sensor, int x, int y, float heading, int xLength, int yLength) {
   this->driver = driver;
+  this->sensor = sensor;
   this->x = x;
   this->y = y;
   this->heading = heading;
@@ -32,8 +33,12 @@ void Navigator::navigate(int x, int y)
     driver->turnAtSpot(heading - angle);
     heading = angle;
     int travelled = driver->forward(distance, TIME_PER_RETARGET);
-    x = (int)(unitfx * travelled);
-    y = (int)(unitfy * travelled);
+    this->x += (int)(unitfx * travelled);
+    this->y += (int)(unitfy * travelled);
+
+    if(!sensor->allBelowThreshold(PROXIMITY_THRESHOLD)) {
+      addObstacle(new Obstacle((int)(this->x + unitfx * PROXIMITY_THRESHOLD), (int)(this->y + unitfy * PROXIMITY_THRESHOLD)));
+    }
   }
 }
 
@@ -50,5 +55,9 @@ void Navigator::applyForce(int x1, int y1, int x2, int y2, int mass) {
 
 void Navigator::addObstacle(Obstacle *obstacle)
 {
+  if(numObstacles >= MAX_OBSTACLES) {
+    delete obstacles[numObstacles % MAX_OBSTACLES];
+  }
+  
   obstacles[numObstacles++ % MAX_OBSTACLES] = obstacle;
 }

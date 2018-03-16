@@ -3,6 +3,7 @@
 
 #include "driver.h"
 #include "Obstacle.h"
+#include "UltraSonic.h"
 
 #define MAX_OBSTACLES 10
 #define DESTINATION_ATTRACTION 2000
@@ -11,11 +12,12 @@
 
 class Navigator {
  public:
-  Navigator(Driver *driver, int x, int y, float heading, int xLength, int yLength);
+  Navigator(Driver *driver, UltraSonic *sensor, int x, int y, float heading, int xLength, int yLength);
   void navigate(int x, int y);
   void addObstacle(Obstacle *obstacle);
  private:
   Driver *driver;
+  UltraSonic *sensor;
   int x, y;
   int xLength, yLength;
   float heading;
