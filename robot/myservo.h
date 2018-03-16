@@ -7,7 +7,7 @@
 #define MyServo_H
 
 #include <Arduino.h>
-#include <Servo.h>
+#include "Servo.h"
 
 class MyServo {
 public:

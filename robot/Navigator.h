@@ -1,16 +1,17 @@
-#ifndef CONTROL_H
-#define CONTROL_H
+#ifndef NAVIGATOR_H
+#define NAVIGATOR_H
 
 #include "driver.h"
 #include "Obstacle.h"
 
 #define MAX_OBSTACLES 10
-#define DESTINATION_ATTRACTION 2000;
-#define TIME_PER_RETARGET 500;
+#define DESTINATION_ATTRACTION 2000
+#define TIME_PER_RETARGET 500
+#define TOLERANCE 10
 
 class Navigator {
  public:
-  Navigator(Driver *driver);
+  Navigator(Driver *driver, int x, int y, float heading, int xLength, int yLength);
   void navigate(int x, int y);
   void addObstacle(Obstacle *obstacle);
  private:
@@ -19,7 +20,7 @@ class Navigator {
   int xLength, yLength;
   float heading;
   int numObstacles;
-  Obstacle obstacles[MAX_OBSTACLES];
+  Obstacle *obstacles[MAX_OBSTACLES];
   void applyForce(int x1, int y1, int x2, int y2, int mass);
   int fx, fy;
 };

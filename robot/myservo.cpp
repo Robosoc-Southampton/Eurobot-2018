@@ -5,7 +5,7 @@
 
 
 #include "myservo.h" //include the declaration for this class
-#include <Servo.h>
+#include "Servo.h"
 
 
 MyServo::MyServo(byte pin){ // constructor

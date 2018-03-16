@@ -4,7 +4,7 @@
  */
 
 
-#include "Song.h" //include the declaration for this class
+#include "song.h" //include the declaration for this class
 
 Song::Song(byte pin){ // constructor
 	_pin = pin; // set pin
