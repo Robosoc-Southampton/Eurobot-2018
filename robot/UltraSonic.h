@@ -2,7 +2,7 @@
 #ifndef UltraSonic_h
 #define UltraSonic_h
 
-#include <arduino.h>
+#include <Arduino.h>
 
 const int MAX_VALUES = 4;
 
