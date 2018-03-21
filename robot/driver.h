@@ -28,7 +28,7 @@ public:
 	/* Pp, Pi, Pd, Pp_t, Pi_t, Pd_t: PID constants, limit_correction and limit_correction_turing: limits max speed of the motors for going straight and turning at spot respectively,
 	 * circumference: circumference of the wheel, wheel_dist: distance between the wheels */
 	void setup(); // calls setup from md25.h to start the serial communication, set acceleration and reset encoders
-	int forward(int dist, long timeout=5000); // drives forward using PID and help functions below
+	int forward(int dist, long timeout=5000, bool sense = true); // drives forward using PID and help functions below
 	// unsafe (won't stop using ultrasonic sensors):
 	int forwardUntilLine(PololuQTRSensors sensor, long timeout=5000); // drives forward until hitting a line
 	void turnAtSpot(float angle, long timeout=5000); // turns at spot until it reaches required angle (positive clockwise) using PID and help functions

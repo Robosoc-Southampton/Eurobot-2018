@@ -28,7 +28,7 @@ const float Pp_t = 0.6; // 0.6
 const float Pi_t = 0;
 const float Pd_t = 0;
 
-int limit_correction = 70; // (min value of 15)
+int limit_correction = 15; // (min value of 15)
 int limit_correction_turning = 90;
 
 int circumference = 314; // [mm]
@@ -72,13 +72,40 @@ void setup() {
   }
 }
 
+void forceForward(int distance, bool sense = true) {
+  for (; distance > 10; distance -= driver.forward(distance, 5000, sense));
+  delay(300);
+}
+
 void loop() {
   // int dist = driver.forward(300);
 
-  driver.turnAtSpot(15.0);
+  while (false) {
+    driver.turnAtSpot((float) random(30, 150) * (random(0, 1) * 2 - 1));
+    for (int dist = random(500, 1500); dist > 10; dist -= driver.forward(dist));
+    delay(1000);
+  }
 
-  delay(300);
+  //*
+  forceForward(350);
+  driver.turnAtSpot(45.0);
+  forceForward(700);
+  driver.turnAtSpot(90.0);
+  forceForward(930);
+  driver.turnAtSpot(-45.0);
+  forceForward(150, false);
   driver.turnAtSpot(-90.0);
+  forceForward(400);
+  delay(300);
+  driver.forward(-400);
+  delay(300);
+  driver.turnAtSpot(-45.0);
+  forceForward(950);
+  driver.turnAtSpot(-45.0);
+  forceForward(1000, false);
+  // */
+
+  // driver.forward(1000, 5000, false);
 
   while (!startButton.state()) {
     Serial.println("Waiting for button");

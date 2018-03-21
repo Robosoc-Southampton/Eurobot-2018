@@ -22,7 +22,7 @@ Driver::Driver(UltraSonic *sensors, unsigned int sensorCount, float Pp, float Pi
 	limit_cor_turn = limit_correction_turning;
 	error = 0;
 	previous_error = 0;
-	md = new MD25(0, 2); // parametres: mode, accelration (ints 1-10)
+	md = new MD25(0, 5); // parametres: mode, accelration (ints 1-10)
 	counter = 0; // counter for forward()
 	error_sum = 0; // cumulated error for terminating the forward()
 	pi = 3.14159;
@@ -36,7 +36,7 @@ void Driver::setup() {
 	md->setup();
 }
 
-int Driver::forward(int dist, long timeout) {
+int Driver::forward(int dist, long timeout, bool sense) {
 	md->encReset(); // reset encoders
 	delay(10);
 	int enc1, enc_target;
@@ -51,15 +51,17 @@ int Driver::forward(int dist, long timeout) {
    
 		if (terminatePid()) break;
 
-    sensors[0].getValue();
-    if (sensorCount == 2) sensors[1].getValue();
+    if (sense) sensors[0].getValue();
+    if (sense && sensorCount == 2) sensors[1].getValue();
     
-		if (sensorCount == 2 && dist < 0 && sensors[1].allBelowThreshold(PROXIMITY_THRESHOLD)) {
+		if (sense && sensorCount == 2 && dist < 0 && sensors[1].allBelowThreshold(PROXIMITY_THRESHOLD)) {
 			md->stopMotors();
+      delay(100);
 			return getDistance(md->encoder1());
 		}
-		if (dist > 0 && sensors[0].allBelowThreshold(PROXIMITY_THRESHOLD)) {
+		if (sense && dist > 0 && sensors[0].allBelowThreshold(PROXIMITY_THRESHOLD)) {
 			md->stopMotors();
+      delay(100);
 			return getDistance(md->encoder1());
 		}
 	} while((millis() - start_time) < timeout);
