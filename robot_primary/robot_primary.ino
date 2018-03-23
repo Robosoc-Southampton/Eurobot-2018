@@ -1,6 +1,9 @@
 
 #include <Servo.h>
 #include "driver.h"
+#include "UltraSonic.h"
+#include "button.h"
+#include "LED.h"
 
 #define pin1 30
 #define pin2 31
@@ -34,9 +37,39 @@ const int limit_correction_turning = 90;
 const int circumference = 314; // [mm]
 const int wheel_dist = 329; // [mm] initialy 235
 
-Driver driver(NULL, 0, Pp, Pi, Pd, Pp_t, Pi_t, Pd_t, limit_correction, limit_correction_turning, circumference, wheel_dist);
+UltraSonic sensor1(12, 11);
+UltraSonic sensor2(40, 41);
+UltraSonic sensors[] = {sensor1, sensor2};
+
+Driver driver(sensors, 2, Pp, Pi, Pd, Pp_t, Pi_t, Pd_t, limit_correction, limit_correction_turning, circumference, wheel_dist);
+
+Button startButton(52);
+Button sideSwitch(48);
+
+LED orangeLED(44);
+LED greenLED(45);
+
+bool onOrangeSide = true;
 
 Servo *openingServo;
+
+void setSide() {
+  onOrangeSide = sideSwitch.state();
+
+  if (onOrangeSide) {
+    orangeLED.on();
+    greenLED.off();
+  }
+  else {
+    orangeLED.off();
+    greenLED.on();
+  }
+}
+
+void finaliseSide() {
+  if (onOrangeSide) orangeLED.blink(2);
+  else greenLED.blink(2);
+}
 
 void setupLauncherMotorPins() {
   pinMode(LAUNCHER_SPEED_PIN, OUTPUT);
@@ -116,13 +149,18 @@ void beginLaunching() {
   setDestickifierMotorSpin(true);
   delay(5000);
 
-  for (int i = 0; i < 20; ++i) {
+  for (int i = 0; i < 15; ++i) {
     spinStepperMotor();
     setDestickifierDirection(i % 2 == 0);
   }
 
   setDestickifierMotorSpin(false);
   setLauncherMotorSpin(false);
+}
+
+void forceDriverForward(int distance, bool sense = true) {
+  for (; distance > 10; distance -= driver.forward(distance, 5000, sense));
+  delay(200);
 }
 
 void setup() {
@@ -133,20 +171,25 @@ void setup() {
   driver.setup();
   
   openServo();
+
+  setSide();
+  while (!startButton.state()) {
+    setSide();
+  }
 }
 
 void loop() {
   // move to ball tube position
-  driver.forward(385, 5000, false);
-  driver.turnAtSpot(90);
-  driver.forward(-115, 5000, false);
+  forceDriverForward(onOrangeSide ? 385 : 485, true);
+  driver.turnAtSpot(onOrangeSide ? 90 : -90);
+  driver.forward(-130, 5000, false); // ultrasonic sensing turned off to avoid detecting the side board and stopping
   // get balls into robot
   closeServo();
   jiggle();
   delay(2000);
   // move into launching position
-  driver.forward(115, 5000, false);
-  driver.turnAtSpot(90);
+  forceDriverForward(130, true);
+  driver.turnAtSpot(onOrangeSide ? 90 : -100);
   // launch balls
   beginLaunching();
 
