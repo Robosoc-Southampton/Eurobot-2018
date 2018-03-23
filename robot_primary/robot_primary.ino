@@ -1,5 +1,6 @@
 
 #include <Servo.h>
+#include "driver.h"
 
 #define pin1 30
 #define pin2 31
@@ -15,10 +16,25 @@
 #define DESTICKIFIER_DIR_PIN_1 23 // IN3
 #define DESTICKIFIER_DIR_PIN_2 22 // IN4
 
-#define OPENING_SERVO_PIN 2
+#define OPENING_SERVO_PIN 10
 
 const int maxServoPosition = 60;
 int currentServoPosition = 0;
+
+const float Pp = 0.5; // 0.5
+const float Pi = 0;
+const float Pd = 0;
+const float Pp_t = 0.6; // 0.6
+const float Pi_t = 0;
+const float Pd_t = 0;
+
+const int limit_correction = 15; // (min value of 15)
+const int limit_correction_turning = 90;
+
+const int circumference = 314; // [mm]
+const int wheel_dist = 329; // [mm] initialy 235
+
+Driver driver(NULL, 0, Pp, Pi, Pd, Pp_t, Pi_t, Pd_t, limit_correction, limit_correction_turning, circumference, wheel_dist);
 
 Servo *openingServo;
 
@@ -87,7 +103,7 @@ void closeServo() {
 }
 
 void jiggle() {
-  for (int i = 0; i < 20; ++i) {
+  for (int i = 0; i < 8; ++i) {
     openingServo->write(150);
     delay(300);
     openingServo->write(125);
@@ -100,10 +116,9 @@ void beginLaunching() {
   setDestickifierMotorSpin(true);
   delay(5000);
 
-  for (int i = 0; i < 10; ++i) {
+  for (int i = 0; i < 20; ++i) {
     spinStepperMotor();
     setDestickifierDirection(i % 2 == 0);
-    delay(300);
   }
 
   setDestickifierMotorSpin(false);
@@ -115,16 +130,24 @@ void setup() {
   setupDestickifierMotorPins();
   setupStepperMotorPins();
   setupOpeningServo();
-
+  driver.setup();
+  
   openServo();
 }
 
 void loop() {
-  // do movement stuff
+  // move to ball tube position
+  driver.forward(385, 5000, false);
+  driver.turnAtSpot(90);
+  driver.forward(-115, 5000, false);
+  // get balls into robot
   closeServo();
   jiggle();
-  // do more movement stuff
-  delay(3000);
+  delay(2000);
+  // move into launching position
+  driver.forward(115, 5000, false);
+  driver.turnAtSpot(90);
+  // launch balls
   beginLaunching();
 
   while (true) {}
