@@ -79,6 +79,25 @@ void forward(){//one tooth forward
   delay(delaytime);
 }
 
+void forwardFast(){//one tooth forward
+  Step_A();
+  delay(delaytime);
+  Step_AB();
+  delay(delaytime);
+  Step_B();
+  delay(delaytime);
+  Step_BC();
+  delay(delaytime);
+  Step_C();
+  delay(delaytime);
+  Step_CD();
+  delay(delaytime);
+  Step_D();
+  delay(delaytime);
+  Step_DA();
+  delay(delaytime);
+}
+
 void backward(){//one tooth backward
   Step_D();
   delay(delaytime);

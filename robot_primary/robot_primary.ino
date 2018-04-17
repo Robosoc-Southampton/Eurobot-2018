@@ -9,7 +9,7 @@
 #define pin2 31
 #define pin3 32
 #define pin4 33
-#define delaytime 5
+#define delaytime 3
 
 #define LAUNCHER_SPEED_PIN 8 // ENA - PWM
 #define LAUNCHER_DIR_PIN_1 25 // IN1
@@ -31,7 +31,7 @@ const float Pp_t = 0.6; // 0.6
 const float Pi_t = 0;
 const float Pd_t = 0;
 
-const int limit_correction = 15; // (min value of 15)
+const int limit_correction = 75; // (min value of 15)
 const int limit_correction_turning = 90;
 
 const int circumference = 314; // [mm]
@@ -111,7 +111,7 @@ void setupOpeningServo() {
 }
 
 void setLauncherMotorSpin(bool spinning) {
-  analogWrite(LAUNCHER_SPEED_PIN, spinning ? 80 : 0);
+  analogWrite(LAUNCHER_SPEED_PIN, spinning ? 70 : 0);
 }
 
 void setDestickifierMotorSpin(bool spinning) {
@@ -121,7 +121,7 @@ void setDestickifierMotorSpin(bool spinning) {
 void spinStepperMotor() {
   step_OFF();
   for (int steps = 120; steps > 0; --steps) {
-    backward();
+    forward();
   }
 }
 
@@ -136,40 +136,67 @@ void closeServo() {
 }
 
 void jiggle() {
-  for (int i = 0; i < 8; ++i) {
+  for (int i = 0; i < 2; ++i) {
     openingServo->write(150);
     delay(300);
     openingServo->write(125);
     delay(300);
   }
+  openingServo->write(150);
 }
 
 void beginLaunching() {
   setLauncherMotorSpin(true);
   setDestickifierMotorSpin(true);
-  delay(5000);
+  setDestickifierDirection(true);
+  delay(2000);
+  setDestickifierMotorSpin(false);
+  delay(2000);
 
   for (int i = 0; i < 15; ++i) {
+    setDestickifierMotorSpin(i % 2 == 0);
+    setDestickifierDirection(i % 4 == 0);
     spinStepperMotor();
-    setDestickifierDirection(i % 2 == 0);
+
+    /*if (i == 6) {
+      setDestickifierMotorSpin(true);
+      delay(2000);
+      setDestickifierMotorSpin(false);
+    }*/
   }
 
   setDestickifierMotorSpin(false);
   setLauncherMotorSpin(false);
 }
 
-void forceDriverForward(int distance, bool sense = true) {
-  for (; distance > 10; distance -= driver.forward(distance, 5000, sense));
-  delay(200);
+void moveForward(int distance, bool sense = true) {
+  int timeout = 5000;
+  int start_time = millis();
+  
+  while (true) {
+    int distanceMoved = driver.forward(distance, timeout, sense);
+    int dt = millis() - start_time;
+ 
+    start_time = millis();
+    timeout -= dt;
+    distance -= distanceMoved;
+    
+    if (distance > -50 && distance < 50) break;
+    if (timeout < 0) break;
+  }
+
+  delay(500);
 }
 
 void setup() {
+  Serial.begin(9600);
+  
   setupLauncherMotorPins();
   setupDestickifierMotorPins();
   setupStepperMotorPins();
   setupOpeningServo();
   driver.setup();
-  
+
   openServo();
 
   setSide();
@@ -180,16 +207,18 @@ void setup() {
 
 void loop() {
   // move to ball tube position
-  forceDriverForward(onOrangeSide ? 385 : 485, true);
+  moveForward(onOrangeSide ? 400 : 440, true);
   driver.turnAtSpot(onOrangeSide ? 90 : -90);
-  driver.forward(-130, 5000, false); // ultrasonic sensing turned off to avoid detecting the side board and stopping
+  driver.forward(onOrangeSide ? -125 : -130, 5000, false); // ultrasonic sensing turned off to avoid detecting the side board and stopping
   // get balls into robot
   closeServo();
+  delay(1000);
   jiggle();
-  delay(2000);
+  delay(1000);
   // move into launching position
-  forceDriverForward(130, true);
-  driver.turnAtSpot(onOrangeSide ? 90 : -100);
+  moveForward(onOrangeSide ? 130 : 150, true);
+  driver.turnAtSpot(onOrangeSide ? 85 : -100);
+  moveForward(200);
   // launch balls
   beginLaunching();
 

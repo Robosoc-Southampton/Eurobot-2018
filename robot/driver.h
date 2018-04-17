@@ -16,8 +16,9 @@
 #include "MD25.h"
 #include "QTRSensors.h"
 #include "UltraSonic.h"
+#include "LED.h"
 
-const float PROXIMITY_THRESHOLD = 20.0;
+const float PROXIMITY_THRESHOLD = 10.0;
 
 class Driver {
 public:
@@ -73,7 +74,7 @@ private:
 	int PID_speed_limited; // limited PID speed so that the motor does not exceeds min and max speeds, performed by getSpeed(..)
 	int cir; // circumference of the wheel [mm]
 	float w_dist; // distance between wheels [mm]
-	MD25* md;
+	public: MD25* md; private:
 	unsigned long cur_time;
 	unsigned long prev_time;
 	unsigned int period;

@@ -44,6 +44,7 @@ void MD25::setup() {
 	Wire.write(_acceleration);                                           
 	Wire.endTransmission();
   	delay(100);
+   
 
 	encReset(); // Cals a function that resets the encoder values to 0 
 }

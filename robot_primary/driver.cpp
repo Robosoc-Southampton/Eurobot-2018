@@ -22,7 +22,7 @@ Driver::Driver(UltraSonic *sensors, unsigned int sensorCount, float Pp, float Pi
 	limit_cor_turn = limit_correction_turning;
 	error = 0;
 	previous_error = 0;
-	md = new MD25(0, 3); // parametres: mode, accelration (ints 1-10)
+	md = new MD25(0, 2); // parametres: mode, acceleration (ints 1-10)
 	counter = 0; // counter for forward()
 	error_sum = 0; // cumulated error for terminating the forward()
 	pi = 3.14159;
@@ -40,30 +40,30 @@ int Driver::forward(int dist, long timeout, bool sense) {
 	md->encReset(); // reset encoders
 	delay(10);
 	int enc1, enc_target;
-	counter, error_sum = 0;
+	counter = error_sum = 0;
 	long start_time = millis();
 
 	do {
+    if (sense) sensors[0].getValue();
+    if (sense && sensorCount == 2) sensors[1].getValue();
+    
+    if (sense && sensorCount == 2 && dist < 0 && sensors[1].allBelowThreshold(PROXIMITY_THRESHOLD)) {
+      md->stopMotors();
+      delay(100);
+      return getDistance(md->encoder1());
+    }
+    if (sense && dist > 0 && sensors[0].allBelowThreshold(PROXIMITY_THRESHOLD)) {
+      md->stopMotors();
+      delay(100);
+      return getDistance(md->encoder1());
+    }
+    
 		enc_target = getEncVal(dist); // get target value for encoders
 		enc1 = md->encoder1(); // asign current value of encoder1 to var enc1
 		calculatePid(enc1, enc_target); // calculate PID value and assign it to private var PID_speed_limited
 		md->setSpeed(PID_speed_limited, PID_speed_limited);
    
 		if (terminatePid()) break;
-
-    if (sense) sensors[0].getValue();
-    if (sense && sensorCount == 2) sensors[1].getValue();
-    
-		if (sense && sensorCount == 2 && dist < 0 && sensors[1].allBelowThreshold(PROXIMITY_THRESHOLD)) {
-			md->stopMotors();
-      delay(100);
-			return getDistance(md->encoder1());
-		}
-		if (sense && dist > 0 && sensors[0].allBelowThreshold(PROXIMITY_THRESHOLD)) {
-			md->stopMotors();
-      delay(100);
-			return getDistance(md->encoder1());
-		}
 	} while((millis() - start_time) < timeout);
 
 	md->stopMotors();
@@ -73,7 +73,7 @@ int Driver::forward(int dist, long timeout, bool sense) {
 int Driver::forwardUntilLine(PololuQTRSensors sensor, long timeout) {
 	md->encReset(); // reset encoders
 	delay(10);
-	counter, error_sum = 0;
+	counter = error_sum = 0;
 	long start_time = millis();
 
 	do {
