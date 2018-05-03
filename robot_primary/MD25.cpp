@@ -11,19 +11,19 @@
 
 #define CMD 0x10
  // This is a but with arduino 1
-#define MD25ADDRESS 0x58 // Address of the MD25
-#define SOFTWAREREG 0x0D /* Byte to read the software version, Values of 0 eing sent using write
+#define MD25ADDRESS  0x58 // Address of the MD25
+#define SOFTWAREREG  0x0D /* Byte to read the software version, Values of 0 eing sent using write
 have to be cast as a byte to stop them being misinterperted as NULL */
-#define SPEED1 (byte)0x00 // Byte to send speed to first motor
+#define SPEED1 0x00 // Byte to send speed to first motor
 #define SPEED2 0x01 // Byte to send speed to second motor
-#define ENCODERONE 0x02 // Byte to read motor encoder 1
-#define ENCODERTWO 0x06 // Byte to read motor encoder 2
-#define VOLTREAD 0x0A // Byte to read battery volts
-#define RESETENCODERS 0x20
-#define MODE_SELECTOR 0xF // Byte to change between control MODES
-#define ACCELERATION 0xE // Byte to define motor acceleration
+#define ENCODERONE  0x02 // Byte to read motor encoder 1
+#define ENCODERTWO  0x06 // Byte to read motor encoder 2
+#define VOLTREAD  0x0A // Byte to read battery volts
+#define RESETENCODERS  0x20
+#define MODE_SELECTOR  0xF // Byte to change between control MODES
+#define ACCELERATION  0xE // Byte to define motor acceleration
 
-MD25::MD25(int mode, int acceleration) { // consturctor, mode of MD25 operation
+MD25::MD25(int mode, int acceleration ) { // consturctor, mode of MD25 operation
 	_mode = mode;
   _acceleration = acceleration;
 }

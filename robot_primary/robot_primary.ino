@@ -24,6 +24,7 @@
 #include "button.h"
 #include "LED.h"
 
+
 #define pin1 30
 #define pin2 31
 #define pin3 32
@@ -34,7 +35,7 @@
 #define LAUNCHER_DIR_PIN_1 25 // IN1
 #define LAUNCHER_DIR_PIN_2 24 // IN2
 
-#define LAUNCHER_SPEED 255
+#define LAUNCHER_SPEED 77
 
 #define DESTICKIFIER_SPEED_PIN 9 // ENB - PWM
 #define DESTICKIFIER_DIR_PIN_1 23 // IN3
@@ -44,15 +45,16 @@
 
 const int maxServoPosition = 15;
 int currentServoPosition = 0;
+const int d = 00; // delay between driving actions
 
-const float Pp = 0.5; // 0.5
+const float Pp = 0.13; // 0.5
 const float Pi = 0;
 const float Pd = 0;
-const float Pp_t = 0.6; // 0.6
+const float Pp_t = 0.13; // 0.6
 const float Pi_t = 0;
 const float Pd_t = 0;
 
-const int limit_correction = 30; // (min value of 15)
+const int limit_correction = 15; // (min value of 15)
 const int limit_correction_turning = 90;
 
 const int circumference = 314; // [mm]
@@ -132,6 +134,8 @@ void setDestickifierDirection(bool forward) {
 
 // set the state of the ball launcher motor (spinning = true -> will spin motor and launch balls)
 void setLauncherMotorSpin(bool spinning) {
+  analogWrite(LAUNCHER_SPEED_PIN, spinning ? 150 : 0);
+  delay (500);
   analogWrite(LAUNCHER_SPEED_PIN, spinning ? LAUNCHER_SPEED : 0);
 }
 
@@ -175,24 +179,37 @@ void jiggle() {
 void beginLaunching() {
   setLauncherMotorSpin(true);
   // setDestickifierMotorSpin(true);
-  setDestickifierDirection(true);
-  delay(2000);
-  setDestickifierMotorSpin(false);
-  delay(2000);
-
-  for (int i = 0; i < 15; ++i) {
+  //setDestickifierDirection(true);
+  //setDestickifierMotorSpin(false);
+  
+  for (int i = 0; i < 20; ++i) {
     // setDestickifierMotorSpin(i % 2 == 0);
-    setDestickifierDirection(i % 4 == 0);
+    //setDestickifierDirection(i % 4 == 0);
     spinStepperMotor();
 
-    /*if (i == 6) {
-      setDestickifierMotorSpin(true);
-      delay(2000);
-      setDestickifierMotorSpin(false);
-    }*/
+//    //if (i == 3) {
+//      //setDestickifierMotorSpin(true);
+//      //delay(2000);
+//      //setDestickifierMotorSpin(false);
+//    }
+//    //if (i == 8) {
+//      //setDestickifierMotorSpin(false);
+//      //delay(2000);
+//      //setDestickifierMotorSpin(false);
+//    }
+//    if (i == 10) {
+//      setDestickifierMotorSpin(true);
+//      delay(2000);
+//      setDestickifierMotorSpin(false);
+//    }
+//    if (i == 12) {
+//      setDestickifierMotorSpin(false);
+//      delay(2000);
+//      setDestickifierMotorSpin(false);
+//    }
   }
 
-  setDestickifierMotorSpin(false);
+  //setDestickifierMotorSpin(false);
   setLauncherMotorSpin(false);
 }
 
@@ -230,9 +247,8 @@ void setup() {
 
   openServo();
 
-  setLauncherMotorSpin(true);
-
-  while (true) {}
+  //setLauncherMotorSpin(true);
+ // while (true) {}
 
   setSide();
   while (!startButton.state()) {
@@ -242,25 +258,32 @@ void setup() {
 
 void loop() {
   // move to ball tube position
-  /*
+  
   moveForward(onOrangeSide ? 400 : 440, true);
+  delay(d);
   driver.turnAtSpot(onOrangeSide ? 90 : -90);
-  driver.forward(onOrangeSide ? -125 : -130, 5000, false); // ultrasonic sensing turned off to avoid detecting the side board and stopping
-  //*/
+  delay(d);
+  driver.forward(onOrangeSide ? -125 : -125, 5000, false); // ultrasonic sensing turned off to avoid detecting the side board and stopping
+  delay(d);
+  //
   // get balls into robot
-  /*
+  
   closeServo();
   delay(1000);
   jiggle();
   delay(1000);
-  //*/
+  //
   // move into launching position
-  /*
+  
   moveForward(onOrangeSide ? 130 : 150, true);
+  delay(d);
   openServo();
-  driver.turnAtSpot(onOrangeSide ? 85 : -95);
-  moveForward(200);
-  //*/
+  delay(d);
+  driver.turnAtSpot(onOrangeSide ? 85 : -97);
+  delay(d);
+  //moveForward(50);
+  //moveForward(200);
+  //
   // launch balls
   beginLaunching();
 
