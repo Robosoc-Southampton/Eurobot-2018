@@ -13,8 +13,5 @@ Button::Button(byte pin){ // constructor
 
 //turn the button on
 bool Button::state() {
-	if (digitalRead(_pin) == 1) {
-		return true;
-	}
-	return false;
+	return digitalRead(_pin) == 1;
 }

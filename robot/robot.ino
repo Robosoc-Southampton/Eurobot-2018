@@ -31,7 +31,7 @@ const float Pp_t = 0.5; // 0.6
 const float Pi_t = 0;
 const float Pd_t = 0.3;
 
-int limit_correction = 75; // (min value of 15)
+int limit_correction = 90; // (min value of 15)
 int limit_correction_turning = 90;
 
 int circumference = 314; // [mm]
@@ -69,7 +69,7 @@ void raiseBeePushingArm() {
 }
 
 void lowerBeePushingArm() {
-  beePushingArmServo->write(0);
+  beePushingArmServo->write(10);
   delay(1000);
 }
 
@@ -126,9 +126,6 @@ void moveForward(int distance, bool sense = true) {
     int distanceMoved = driver.forward(distance, timeout, sense);
     int dt = millis() - start_time;
 
-    Serial.print("Moved ");
-    Serial.println(distanceMoved);
-    
     start_time = millis();
     timeout -= dt;
     distance -= distanceMoved;
@@ -137,9 +134,11 @@ void moveForward(int distance, bool sense = true) {
     if (timeout < 0) break;
   }
 
-  Serial.print("Error ");
-  Serial.println(distance);
+  delay(500);
+}
 
+void alignToWall(int distance) {
+  driver.forward(-distance, 3000, false);
   delay(500);
 }
 
@@ -147,14 +146,16 @@ void loop() {
   if (onOrangeSide) {
     moveForward(900);
     driver.turnAtSpot(-90);
-    driver.forward(200, 1000, false);
+    alignToWall(-200);
     moveForward(800);
     driver.turnAtSpot(-45);
     moveForward(1050);
     driver.turnAtSpot(-135);
-    moveForward(-180);
-    driver.turnAtSpot(-93);
-    driver.forward(500); // should stop when it detects a thing
+    alignToWall(-500);
+    moveForward(85);
+    driver.turnAtSpot(-90);
+    moveForward(-300);
+    alignToWall(-200);
     lowerBeePushingArm();
     moveForward(320);
     raiseBeePushingArm();
@@ -162,14 +163,17 @@ void loop() {
   else {
     moveForward(800);
     driver.turnAtSpot(90);
-    driver.forward(200, 1000, false);
+    alignToWall(-200);
     moveForward(790);
     driver.turnAtSpot(45);
     moveForward(900);
     driver.turnAtSpot(135);
-    moveForward(-310, false);
+    moveForward(-150);
+    alignToWall(-500);
+    moveForward(85);
     driver.turnAtSpot(-90);
-    moveForward(300, false);
+    moveForward(300);
+    alignToWall(200);
     lowerBeePushingArm();
     moveForward(-300);
     raiseBeePushingArm();

@@ -18,7 +18,7 @@
 #include "UltraSonic.h"
 #include "LED.h"
 
-const float PROXIMITY_THRESHOLD = 10.0;
+const float PROXIMITY_THRESHOLD = 15.0;
 
 class Driver {
 public:
