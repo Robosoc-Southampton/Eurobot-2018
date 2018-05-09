@@ -159,6 +159,14 @@ void loop() {
     lowerBeePushingArm();
     moveForward(320);
     raiseBeePushingArm();
+    moveForward(-100);
+    driver.turnAtSpot(90);
+    moveForward(-100, false);
+    moveForward(300);
+    driver.turnAtSpot(-45);
+    moveForward(800);
+    driver.turnAtSpot(45);
+    moveForward(1000, false);
   }
   else {
     moveForward(800);
@@ -177,6 +185,14 @@ void loop() {
     lowerBeePushingArm();
     moveForward(-300);
     raiseBeePushingArm();
+    moveForward(100);
+    driver.turnAtSpot(90);
+    moveForward(-150, false);
+    moveForward(300);
+    driver.turnAtSpot(45);
+    moveForward(720);
+    driver.turnAtSpot(-45);
+    moveForward(900, false);
   }
 
   while (true) {}

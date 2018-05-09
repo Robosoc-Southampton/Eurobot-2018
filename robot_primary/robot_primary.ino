@@ -178,35 +178,21 @@ void jiggle() {
 // begin the whole launching cycle, should be called once
 void beginLaunching() {
   setLauncherMotorSpin(true);
-  // setDestickifierMotorSpin(true);
-  //setDestickifierDirection(true);
-  //setDestickifierMotorSpin(false);
+  setDestickifierMotorSpin(true);
+  setDestickifierDirection(true);
+  delay(1000);
+  setDestickifierMotorSpin(false);
   
-  for (int i = 0; i < 20; ++i) {
+  for (int i = 0; i < 14; ++i) {
     // setDestickifierMotorSpin(i % 2 == 0);
     //setDestickifierDirection(i % 4 == 0);
     spinStepperMotor();
 
-//    //if (i == 3) {
-//      //setDestickifierMotorSpin(true);
-//      //delay(2000);
-//      //setDestickifierMotorSpin(false);
-//    }
-//    //if (i == 8) {
-//      //setDestickifierMotorSpin(false);
-//      //delay(2000);
-//      //setDestickifierMotorSpin(false);
-//    }
-//    if (i == 10) {
-//      setDestickifierMotorSpin(true);
-//      delay(2000);
-//      setDestickifierMotorSpin(false);
-//    }
-//    if (i == 12) {
-//      setDestickifierMotorSpin(false);
-//      delay(2000);
-//      setDestickifierMotorSpin(false);
-//    }
+    if (i == 3 || i == 8 || i == 10 || i == 12) {
+      setDestickifierMotorSpin(true);
+      delay(2000);
+      setDestickifierMotorSpin(false);
+    }
   }
 
   //setDestickifierMotorSpin(false);
@@ -259,7 +245,7 @@ void setup() {
 void loop() {
   // move to ball tube position
   
-  moveForward(onOrangeSide ? 400 : 440, true);
+  moveForward(onOrangeSide ? 400 : 440, false);
   delay(d);
   driver.turnAtSpot(onOrangeSide ? 90 : -90);
   delay(d);
@@ -275,11 +261,11 @@ void loop() {
   //
   // move into launching position
   
-  moveForward(onOrangeSide ? 130 : 150, true);
+  moveForward(onOrangeSide ? 130 : 150);
   delay(d);
   openServo();
   delay(d);
-  driver.turnAtSpot(onOrangeSide ? 85 : -97);
+  driver.turnAtSpot(onOrangeSide ? 90 : -97);
   delay(d);
   //moveForward(50);
   //moveForward(200);
