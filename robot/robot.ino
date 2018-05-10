@@ -10,7 +10,6 @@
 #include "driver.h"
 #include "button.h"
 #include "myservo.h"
-#include "PID.h"
 #include "UltraSonic.h"
 
 #define MD25ADDRESS         0x58                              // Address of the MD25
@@ -23,6 +22,8 @@
 #define MODE_SELECTOR       0xF                               // Byte to change between control MODES
 
 const int ALLOWED_ERROR = 5;
+
+const unsigned long START_TIME = millis();
 
 const float Pp = 0.5; // 0.5
 const float Pi = 0.0;
@@ -73,6 +74,38 @@ void lowerBeePushingArm() {
   delay(1000);
 }
 
+void assertTimeLeft() {
+  if (millis() - START_TIME >= 85) {
+    exit(0);
+  }
+}
+
+void moveForward(int distance, bool sense = true) {
+  int timeout = 90000;
+  int start_time = millis();
+
+  distance = -distance;
+  
+  while (true) {
+    int distanceMoved = driver.forward(distance, timeout, sense);
+    int dt = millis() - start_time;
+
+    start_time = millis();
+    timeout -= dt;
+    distance -= distanceMoved;
+    
+    if (distance > -ALLOWED_ERROR && distance < ALLOWED_ERROR) break;
+    if (timeout < 0) break;
+  }
+
+  delay(500);
+}
+
+void alignToWall(int distance) {
+  driver.forward(-distance, 3000, false);
+  delay(500);
+}
+
 void setup() {
   // Serial.begin(9600); // start serial commuication
   // Serial.println("starting set up");
@@ -103,45 +136,6 @@ void setup() {
   }
 }
 
-void forceForward(int distance, bool sense = true) {
-  distance = -distance;
-  int timeout = 5000;
-  int dt = 0;
-  int start = millis();
-  for (; distance < -10; distance -= driver.forward(distance, timeout, sense)) {
-    dt = millis() - start;
-    start = millis();
-    timeout -= dt;
-  }
-  delay(300);
-}
-
-void moveForward(int distance, bool sense = true) {
-  int timeout = 5000;
-  int start_time = millis();
-
-  distance = -distance;
-  
-  while (true) {
-    int distanceMoved = driver.forward(distance, timeout, sense);
-    int dt = millis() - start_time;
-
-    start_time = millis();
-    timeout -= dt;
-    distance -= distanceMoved;
-    
-    if (distance > -ALLOWED_ERROR && distance < ALLOWED_ERROR) break;
-    if (timeout < 0) break;
-  }
-
-  delay(500);
-}
-
-void alignToWall(int distance) {
-  driver.forward(-distance, 3000, false);
-  delay(500);
-}
-
 void loop() {
   if (onOrangeSide) {
     moveForward(900);
@@ -159,6 +153,8 @@ void loop() {
     lowerBeePushingArm();
     moveForward(320);
     raiseBeePushingArm();
+    moveForward(-150);
+    /*
     moveForward(-100);
     driver.turnAtSpot(90);
     moveForward(-100, false);
@@ -167,6 +163,7 @@ void loop() {
     moveForward(800);
     driver.turnAtSpot(45);
     moveForward(1000, false);
+    */
   }
   else {
     moveForward(800);
@@ -180,11 +177,13 @@ void loop() {
     alignToWall(-500);
     moveForward(85);
     driver.turnAtSpot(-90);
-    moveForward(300);
-    alignToWall(200);
+    moveForward(150);
+    alignToWall(300);
     lowerBeePushingArm();
     moveForward(-300);
     raiseBeePushingArm();
+    moveForward(150);
+    /*
     moveForward(100);
     driver.turnAtSpot(90);
     moveForward(-150, false);
@@ -193,6 +192,7 @@ void loop() {
     moveForward(720);
     driver.turnAtSpot(-45);
     moveForward(900, false);
+    */
   }
 
   while (true) {}

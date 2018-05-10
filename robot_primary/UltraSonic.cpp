@@ -23,7 +23,7 @@ float UltraSonic::getValue() {
 	delayMicroseconds(10);
 	digitalWrite(triggerPin, LOW);
 
-	duration = pulseIn(echoPin, HIGH);
+	duration = pulseIn(echoPin, HIGH, 250000);
 	distance = duration * 0.017;
 
 	// record value

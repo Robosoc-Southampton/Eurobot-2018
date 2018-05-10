@@ -44,20 +44,19 @@ int Driver::forward(int dist, long timeout, bool sense) {
 	long start_time = millis();
 
 	do {
-    if (sense) sensors[0].getValue();
-    if (sense && sensorCount == 2) sensors[1].getValue();
-    
-    if (sense && sensorCount == 2 && dist < 0 && sensors[1].allBelowThreshold(PROXIMITY_THRESHOLD)) {
+    if (sense) for (int i = 0; i < 4; ++i) sensors[i].getValue();
+
+    if (sense && dist < 0 && sensors[1].allBelowThreshold(PROXIMITY_THRESHOLD)) {
       md->stopMotors();
       delay(100);
       return getDistance(md->encoder1());
     }
-    if (sense && dist > 0 && sensors[0].allBelowThreshold(PROXIMITY_THRESHOLD)) {
-      md->stopMotors();
+    if (sense && dist > 0 && (sensors[0].allBelowThreshold(PROXIMITY_THRESHOLD) || sensors[2].allBelowThreshold(PROXIMITY_THRESHOLD) || sensors[3].allBelowThreshold(PROXIMITY_THRESHOLD))) {
+      md->stopMotors(); 
       delay(100);
       return getDistance(md->encoder1());
     }
-    
+
 		enc_target = getEncVal(dist); // get target value for encoders
 		enc1 = md->encoder1(); // asign current value of encoder1 to var enc1
 		calculatePid(enc1, enc_target); // calculate PID value and assign it to private var PID_speed_limited
@@ -65,6 +64,8 @@ int Driver::forward(int dist, long timeout, bool sense) {
    
 		if (terminatePid()) break;
 	} while((millis() - start_time) < timeout);
+
+  Serial.print("Other exit");
 
 	md->stopMotors();
 	return getDistance(md->encoder1());

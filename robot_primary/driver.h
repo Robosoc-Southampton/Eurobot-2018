@@ -17,7 +17,7 @@
 #include "QTRSensors.h"
 #include "UltraSonic.h"
 
-const float PROXIMITY_THRESHOLD = 20.0;
+const float PROXIMITY_THRESHOLD = 30.0;
 
 class Driver {
 public:

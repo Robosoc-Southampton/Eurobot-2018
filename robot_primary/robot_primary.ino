@@ -43,6 +43,8 @@
 
 #define OPENING_SERVO_PIN 10
 
+unsigned long START_TIME = millis();
+
 const int maxServoPosition = 15;
 int currentServoPosition = 0;
 const int d = 00; // delay between driving actions
@@ -60,11 +62,13 @@ const int limit_correction_turning = 90;
 const int circumference = 314; // [mm]
 const int wheel_dist = 329; // [mm] initialy 235
 
-UltraSonic sensor1(12, 11);
+UltraSonic sensor1(12, 11); // front
 UltraSonic sensor2(40, 41);
-UltraSonic sensors[] = {sensor1, sensor2};
+UltraSonic sensor3(3, 4); // left
+UltraSonic sensor4(38, 39); // right
+UltraSonic sensors[] = {sensor1, sensor2, sensor3, sensor4};
 
-Driver driver(sensors, 2, Pp, Pi, Pd, Pp_t, Pi_t, Pd_t, limit_correction, limit_correction_turning, circumference, wheel_dist);
+Driver driver(sensors, 4, Pp, Pi, Pd, Pp_t, Pi_t, Pd_t, limit_correction, limit_correction_turning, circumference, wheel_dist);
 
 Button startButton(52);
 Button sideSwitch(48);
@@ -175,22 +179,26 @@ void jiggle() {
   openingServo->write(150);
 }
 
-// begin the whole launching cycle, should be called once
-void beginLaunching() {
+void setupLaunching() {
   setLauncherMotorSpin(true);
   setDestickifierMotorSpin(true);
   setDestickifierDirection(true);
   delay(1000);
   setDestickifierMotorSpin(false);
-  
-  for (int i = 0; i < 14; ++i) {
+  delay(1000);
+}
+
+// begin the whole launching cycle, should be called once
+void beginLaunching() {
+  for (int i = 0; i < 12; ++i) {
+    if (millis() - START_TIME >= 84000) break;
     // setDestickifierMotorSpin(i % 2 == 0);
     //setDestickifierDirection(i % 4 == 0);
     spinStepperMotor();
 
     if (i == 3 || i == 8 || i == 10 || i == 12) {
       setDestickifierMotorSpin(true);
-      delay(2000);
+      delay(1000);
       setDestickifierMotorSpin(false);
     }
   }
@@ -201,12 +209,12 @@ void beginLaunching() {
 
 // move forward by a distance in millimeters, `sense` will enable the ultrasonic sensors
 void moveForward(int distance, bool sense = true) {
-  int timeout = 5000;
-  int start_time = millis();
+  unsigned long timeout = 90000;
+  unsigned long start_time = millis();
   
   while (true) {
-    int distanceMoved = driver.forward(distance, timeout, sense);
-    int dt = millis() - start_time;
+    int distanceMoved = driver.forward(distance, timeout < 10000 ? timeout : 10000, sense);
+    unsigned long dt = millis() - start_time;
  
     start_time = millis();
     timeout -= dt;
@@ -216,25 +224,31 @@ void moveForward(int distance, bool sense = true) {
     if (timeout < 0) break;
   }
 
-  delay(500);
+  delay(250);
 }
 
 void setup() {
   Serial.begin(9600);
-
+  
   orangeLED.on();
   greenLED.on();
-  
+
   setupLauncherMotorPins();
   setupDestickifierMotorPins();
   setupStepperMotorPins();
   setupOpeningServo();
+  
   driver.setup();
 
   openServo();
 
-  //setLauncherMotorSpin(true);
- // while (true) {}
+  /*while (true) {
+    Serial.print(sensor3.getValue());
+    Serial.print(", ");
+    Serial.print(sensor1.getValue());
+    Serial.print(", ");
+    Serial.println(sensor4.getValue());
+  }*/
 
   setSide();
   while (!startButton.state()) {
@@ -244,13 +258,10 @@ void setup() {
 
 void loop() {
   // move to ball tube position
-  
-  moveForward(onOrangeSide ? 400 : 440, false);
-  delay(d);
+
+  moveForward(onOrangeSide ? 400 : 440);
   driver.turnAtSpot(onOrangeSide ? 90 : -90);
-  delay(d);
-  driver.forward(onOrangeSide ? -125 : -125, 5000, false); // ultrasonic sensing turned off to avoid detecting the side board and stopping
-  delay(d);
+  moveForward(-125, false); // ultrasonic sensing turned off to avoid detecting the side board and stopping
   //
   // get balls into robot
   
@@ -262,11 +273,10 @@ void loop() {
   // move into launching position
   
   moveForward(onOrangeSide ? 130 : 150);
-  delay(d);
   openServo();
-  delay(d);
+  setupLaunching();
+  
   driver.turnAtSpot(onOrangeSide ? 90 : -97);
-  delay(d);
   //moveForward(50);
   //moveForward(200);
   //

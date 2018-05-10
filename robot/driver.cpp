@@ -49,19 +49,16 @@ int Driver::forward(int dist, long timeout, bool sense) {
 
     float sensorDistance = sensors[1].getValue();
 
-    Serial.println(sensorDistance);
-
     if (sense && sensorCount == 2 && dist < 0 && sensors[1].allBelowThreshold(PROXIMITY_THRESHOLD)) {
-      Serial.println("Stopping here");
       md->stopMotors();
       delay(2000);
       return getDistance(md->encoder1());
     }
-    /*if (sense && dist > 0 && sensors[0].getValue() < PROXIMITY_THRESHOLD) {
+    if (sense && dist > 0 && sensors[0].getValue() < PROXIMITY_THRESHOLD) {
       md->stopMotors();
       delay(50);
       return getDistance(md->encoder1());
-    }*/
+    }
     
     enc_target = getEncVal(dist); // get target value for encoders
     enc1 = md->encoder1(); // asign current value of encoder1 to var enc1
