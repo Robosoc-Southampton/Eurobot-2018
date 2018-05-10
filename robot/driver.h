@@ -17,6 +17,7 @@
 #include "QTRSensors.h"
 #include "UltraSonic.h"
 #include "LED.h"
+#include "time.h"
 
 const float PROXIMITY_THRESHOLD = 15.0;
 
@@ -31,7 +32,6 @@ public:
 	void setup(); // calls setup from md25.h to start the serial communication, set acceleration and reset encoders
 	int forward(int dist, long timeout=5000, bool sense = true); // drives forward using PID and help functions below
 	// unsafe (won't stop using ultrasonic sensors):
-	int forwardUntilLine(PololuQTRSensors sensor, long timeout=5000); // drives forward until hitting a line
 	void turnAtSpot(float angle, long timeout=5000); // turns at spot until it reaches required angle (positive clockwise) using PID and help functions
 	void turn(int rad, int angle, char side, long timeout=5000); // drives on arc with specified parametres
 

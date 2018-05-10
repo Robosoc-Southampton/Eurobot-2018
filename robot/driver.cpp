@@ -42,21 +42,23 @@ int Driver::forward(int dist, long timeout, bool sense) {
   int enc1, enc_target;
   counter = error_sum = 0;
   long start_time = millis();
+  assertTimeLeft();
 
   do {
-    // if (sense) sensors[0].getValue();
-    // if (sense && sensorCount == 2) sensors[1].getValue();
+    if (sense) sensors[0].getValue();
+    if (sense) sensors[1].getValue();
+    if (sense) sensors[2].getValue();
 
     float sensorDistance = sensors[1].getValue();
 
-    if (sense && sensorCount == 2 && dist < 0 && sensors[1].allBelowThreshold(PROXIMITY_THRESHOLD)) {
+    if (sense && dist < 0 && (sensors[1].allBelowThreshold(PROXIMITY_THRESHOLD) || sensors[2].allBelowThreshold(PROXIMITY_THRESHOLD))) {
       md->stopMotors();
-      delay(2000);
+      delay(250);
       return getDistance(md->encoder1());
     }
     if (sense && dist > 0 && sensors[0].getValue() < PROXIMITY_THRESHOLD) {
       md->stopMotors();
-      delay(50);
+      delay(250);
       return getDistance(md->encoder1());
     }
     
@@ -72,26 +74,6 @@ int Driver::forward(int dist, long timeout, bool sense) {
   return getDistance(md->encoder1());
 }
 
-int Driver::forwardUntilLine(PololuQTRSensors sensor, long timeout) {
-  md->encReset(); // reset encoders
-  delay(10);
-  counter = error_sum = 0;
-  long start_time = millis();
-
-  do {
-    int speed = 255 - limit_cor;
-    md->setSpeed(speed, speed);
-    
-    if (senseLine(sensor)) {
-      break;
-    }
-  } while((millis() - start_time) < timeout);
-
-  md->stopMotors();
-
-  return getDistance(md->encoder1());
-}
-
 void Driver::turnAtSpot(float angle, long timeout) {
   md->encReset(); // reset encoders
   delay(10);
@@ -100,6 +82,8 @@ void Driver::turnAtSpot(float angle, long timeout) {
   int enc1, enc_target = 0;
   counter, error_sum = 0;
   long start_time = millis();
+  assertTimeLeft();
+  
   do {
     enc_target = -getEncVal(dist); // get target value for encoders
     enc1 = md->encoder1();

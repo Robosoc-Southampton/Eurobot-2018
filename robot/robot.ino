@@ -21,13 +21,11 @@
 #define CMD                 0x10                              // Byte to reset encoder values
 #define MODE_SELECTOR       0xF                               // Byte to change between control MODES
 
-const int ALLOWED_ERROR = 5;
+const int ALLOWED_ERROR = 20;
 
-const unsigned long START_TIME = millis();
-
-const float Pp = 0.5; // 0.5
+const float Pp = 0.3; // 0.5
 const float Pi = 0.0;
-const float Pd = 0.3;
+const float Pd = 0.2;
 const float Pp_t = 0.5; // 0.6
 const float Pi_t = 0;
 const float Pd_t = 0.3;
@@ -41,7 +39,7 @@ int wheel_dist = 215; // [mm] initialy 235
 bool onOrangeSide = true;
 
 // create objects
-const unsigned int SENSOR_COUNT = 2;
+const unsigned int SENSOR_COUNT = 3;
 
 Button startButton(6);
 Button sideSwitch(7);
@@ -53,7 +51,8 @@ Servo *beePushingArmServo;
 
 UltraSonic distanceSensor(2, 3);
 UltraSonic rearDistanceSensor(5, 4);
-UltraSonic distanceSensors[SENSOR_COUNT] = {rearDistanceSensor, distanceSensor};
+UltraSonic otherDistanceSensor(13, 12);
+UltraSonic distanceSensors[SENSOR_COUNT] = {rearDistanceSensor, distanceSensor, otherDistanceSensor};
 
 Driver driver(distanceSensors, SENSOR_COUNT, Pp, Pi, Pd, Pp_t, Pi_t, Pd_t, limit_correction, limit_correction_turning, circumference, wheel_dist);
 
@@ -72,12 +71,6 @@ void raiseBeePushingArm() {
 void lowerBeePushingArm() {
   beePushingArmServo->write(10);
   delay(1000);
-}
-
-void assertTimeLeft() {
-  if (millis() - START_TIME >= 85) {
-    exit(0);
-  }
 }
 
 void moveForward(int distance, bool sense = true) {
@@ -107,16 +100,7 @@ void alignToWall(int distance) {
 }
 
 void setup() {
-  // Serial.begin(9600); // start serial commuication
-  // Serial.println("starting set up");
-
   Serial.begin(9600);
-
-  while (false) {
-    Serial.print(distanceSensor.allBelowThreshold(10.0));
-    Serial.print(" ");
-    Serial.println(distanceSensor.getValue());
-  }
 
   driver.setup(); // start I2C, setup MD25 to mode 0
   pinMode(10, OUTPUT);
