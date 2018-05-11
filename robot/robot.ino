@@ -120,7 +120,7 @@ void setup() {
     setSide();
   }
 
-  init(); // Start timer.
+  init_timer(); // Start timer.
 }
 
 void loop() {

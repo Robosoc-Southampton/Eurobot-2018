@@ -1,7 +1,9 @@
 
 #include "time.h"
 
-void init() {
+unsigned long START_TIME;
+
+void init_timer() {
   START_TIME = millis();
 }
 
