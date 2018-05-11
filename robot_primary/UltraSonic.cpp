@@ -16,7 +16,7 @@ void UltraSonic::fillLastValues() {
 
 float UltraSonic::getValue() {
 	long duration;
-	int distance;
+	float distance;
 	digitalWrite(triggerPin, LOW);
 	delayMicroseconds(2);
 	digitalWrite(triggerPin, HIGH);
@@ -25,6 +25,8 @@ float UltraSonic::getValue() {
 
 	duration = pulseIn(echoPin, HIGH, 250000);
 	distance = duration * 0.017;
+
+  if (distance < 1.0) distance = 100.0;
 
 	// record value
 	lastValues[(readings++) % MAX_VALUES] = distance;

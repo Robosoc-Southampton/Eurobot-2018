@@ -34,7 +34,7 @@ const float Pd_t = 0.3;
 int limit_correction = 90; // (min value of 15)
 int limit_correction_turning = 90;
 
-int circumference = 314; // [mm]
+int circumference = 310; // [mm]
 int wheel_dist = 215; // [mm] initialy 235
 
 bool onOrangeSide = true;
@@ -132,8 +132,9 @@ void loop() {
     driver.turnAtSpot(-45);
     moveForward(1050);
     driver.turnAtSpot(-135);
+    moveForward(-150);
     alignToWall(-500);
-    moveForward(85);
+    moveForward(90);
     driver.turnAtSpot(-90);
     moveForward(-300);
     alignToWall(-200);
@@ -162,7 +163,7 @@ void loop() {
     driver.turnAtSpot(135);
     moveForward(-150);
     alignToWall(-500);
-    moveForward(85);
+    moveForward(90);
     driver.turnAtSpot(-90);
     moveForward(150);
     alignToWall(300);

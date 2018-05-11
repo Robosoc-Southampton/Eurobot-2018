@@ -24,18 +24,17 @@
 #include "button.h"
 #include "LED.h"
 
-
 #define pin1 30
 #define pin2 31
 #define pin3 32
 #define pin4 33
-#define delaytime 3
+#define delaytime 4
 
 #define LAUNCHER_SPEED_PIN 8 // ENA - PWM
 #define LAUNCHER_DIR_PIN_1 25 // IN1
 #define LAUNCHER_DIR_PIN_2 24 // IN2
 
-#define LAUNCHER_SPEED 77
+#define LAUNCHER_SPEED 84 // 77
 
 #define DESTICKIFIER_SPEED_PIN 9 // ENB - PWM
 #define DESTICKIFIER_DIR_PIN_1 23 // IN3
@@ -43,7 +42,7 @@
 
 #define OPENING_SERVO_PIN 10
 
-unsigned long START_TIME;
+unsigned long START_TIME = 0;
 
 const int maxServoPosition = 15;
 int currentServoPosition = 0;
@@ -138,9 +137,12 @@ void setDestickifierDirection(bool forward) {
 
 // set the state of the ball launcher motor (spinning = true -> will spin motor and launch balls)
 void setLauncherMotorSpin(bool spinning) {
-  analogWrite(LAUNCHER_SPEED_PIN, spinning ? 150 : 0);
-  delay (500);
+  if (spinning) {
+    analogWrite(LAUNCHER_SPEED_PIN, 150);
+    delay (150);
+  }
   analogWrite(LAUNCHER_SPEED_PIN, spinning ? LAUNCHER_SPEED : 0);
+  delay(200);
 }
 
 // set the state of the cable tie motor (spinning = true -> will spin motor)
@@ -152,7 +154,7 @@ void setDestickifierMotorSpin(bool spinning) {
 void spinStepperMotor() {
   step_OFF();
   for (int steps = 120; steps > 0; --steps) {
-    forward();
+    forwardFast();
   }
 }
 
@@ -192,22 +194,10 @@ void setupLaunching() {
 void beginLaunching() {
   for (int i = 0; true; ++i) {
     if (millis() - START_TIME >= 84000) break;
-    // setDestickifierMotorSpin(i % 2 == 0);
-    //setDestickifierDirection(i % 4 == 0);
+    setDestickifierMotorSpin(i % 2 == 0);
+    setDestickifierDirection(i % 4 == 0);
     spinStepperMotor();
-
-    if (i == 4 || i == 8 || i == 12) {
-      setDestickifierDirection(true);
-      setDestickifierMotorSpin(true);
-      delay(1000);
-      setDestickifierMotorSpin(false);
-    }
-    if (i == 6 || i == 10 || i == 14) {
-      setDestickifierDirection(false);
-      setDestickifierMotorSpin(true);
-      delay(1000);
-      setDestickifierMotorSpin(false);
-    }
+    delay(100);
   }
 
   //setDestickifierMotorSpin(false);
@@ -261,7 +251,9 @@ void setup() {
   while (!startButton.state()) {
     setSide();
   }
-  START_TIME = millis();
+
+  if (START_TIME == 0)
+    START_TIME = millis();
 }
 
 void loop() {
