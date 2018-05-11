@@ -43,7 +43,7 @@
 
 #define OPENING_SERVO_PIN 10
 
-unsigned long START_TIME = millis();
+unsigned long START_TIME;
 
 const int maxServoPosition = 15;
 int currentServoPosition = 0;
@@ -261,6 +261,7 @@ void setup() {
   while (!startButton.state()) {
     setSide();
   }
+  START_TIME = millis();
 }
 
 void loop() {

@@ -1,7 +1,9 @@
 
 #include "arduino.h"
 
-const unsigned long START_TIME = millis();
+unsigned long START_TIME;
+
+void init();
 
 void assertTimeLeft();
 
