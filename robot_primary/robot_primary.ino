@@ -190,13 +190,20 @@ void setupLaunching() {
 
 // begin the whole launching cycle, should be called once
 void beginLaunching() {
-  for (int i = 0; i < 12; ++i) {
+  for (int i = 0; true; ++i) {
     if (millis() - START_TIME >= 84000) break;
     // setDestickifierMotorSpin(i % 2 == 0);
     //setDestickifierDirection(i % 4 == 0);
     spinStepperMotor();
 
-    if (i == 3 || i == 8 || i == 10 || i == 12) {
+    if (i == 4 || i == 8 || i == 12) {
+      setDestickifierDirection(true);
+      setDestickifierMotorSpin(true);
+      delay(1000);
+      setDestickifierMotorSpin(false);
+    }
+    if (i == 6 || i == 10 || i == 14) {
+      setDestickifierDirection(false);
       setDestickifierMotorSpin(true);
       delay(1000);
       setDestickifierMotorSpin(false);
@@ -213,7 +220,7 @@ void moveForward(int distance, bool sense = true) {
   unsigned long start_time = millis();
   
   while (true) {
-    int distanceMoved = driver.forward(distance, timeout < 10000 ? timeout : 10000, sense);
+    int distanceMoved = driver.forward(distance, timeout < 5000 ? timeout : 5000, sense);
     unsigned long dt = millis() - start_time;
  
     start_time = millis();
@@ -259,7 +266,7 @@ void setup() {
 void loop() {
   // move to ball tube position
 
-  moveForward(onOrangeSide ? 400 : 440);
+  moveForward(onOrangeSide ? 400 : 445);
   driver.turnAtSpot(onOrangeSide ? 90 : -90);
   moveForward(-125, false); // ultrasonic sensing turned off to avoid detecting the side board and stopping
   //
@@ -268,7 +275,7 @@ void loop() {
   closeServo();
   delay(1000);
   jiggle();
-  delay(1000);
+  delay(500);
   //
   // move into launching position
   

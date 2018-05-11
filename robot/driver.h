@@ -1,8 +1,7 @@
-/* This library for Arduino was created by Daniel Hausner and debugged with a help of Taiwo Khourie, George Hadjigeorgioua
- * Shadi Hamou and Bethany Harding in Nov 2017 for odometry assignment at University of Southampton.
- * It eases interaction with MD25 driver.
- * dh4n16@soton.ac.uk
- */
+ /*/ Shadi Hamou and Bethany Harding in Nov 2017 for odometry assignment at University of Southampton.
+ /* It eases interaction with MD25 driver.
+ /* dh4n16@soton.ac.uk
+ /*
 
 /*	10*circumference = 3213 mm
 	distance between wheels = 235 mm

@@ -49,8 +49,7 @@ int Driver::forward(int dist, long timeout, bool sense) {
     if (sense) sensors[1].getValue();
     if (sense) sensors[2].getValue();
 
-    float sensorDistance = sensors[1].getValue();
-
+    
     if (sense && dist < 0 && (sensors[1].allBelowThreshold(PROXIMITY_THRESHOLD) || sensors[2].allBelowThreshold(PROXIMITY_THRESHOLD))) {
       md->stopMotors();
       delay(250);

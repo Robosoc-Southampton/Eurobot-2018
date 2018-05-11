@@ -23,9 +23,9 @@
 
 const int ALLOWED_ERROR = 20;
 
-const float Pp = 0.3; // 0.5
+const float Pp = 0.5; // 0.5,   0.15
 const float Pi = 0.0;
-const float Pd = 0.2;
+const float Pd = 0.3; //    0.05
 const float Pp_t = 0.5; // 0.6
 const float Pi_t = 0;
 const float Pd_t = 0.3;
@@ -50,7 +50,7 @@ LED greenSideLED(9);
 Servo *beePushingArmServo;
 
 UltraSonic distanceSensor(2, 3);
-UltraSonic rearDistanceSensor(5, 4);
+UltraSonic rearDistanceSensor(4, 5);
 UltraSonic otherDistanceSensor(13, 12);
 UltraSonic distanceSensors[SENSOR_COUNT] = {rearDistanceSensor, distanceSensor, otherDistanceSensor};
 
@@ -80,7 +80,7 @@ void moveForward(int distance, bool sense = true) {
   distance = -distance;
   
   while (true) {
-    int distanceMoved = driver.forward(distance, timeout, sense);
+    int distanceMoved = driver.forward(distance, 5000, sense);
     int dt = millis() - start_time;
 
     start_time = millis();

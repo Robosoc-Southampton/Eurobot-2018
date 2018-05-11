@@ -4,7 +4,7 @@
 
 #include <Arduino.h>
 
-const int MAX_VALUES = 2;
+const int MAX_VALUES = 4;
 
 class UltraSonic {
 public:
