@@ -267,7 +267,7 @@ void setup() {
 void loop() {
   // move to ball tube position
 
-  moveForward(onOrangeSide ? 400 : 445);
+  moveForward(onOrangeSide ? 395 : 445);
   driver.turnAtSpot(onOrangeSide ? 90 : -90);
   moveForward(-125, false); // ultrasonic sensing turned off to avoid detecting the side board and stopping
   //
