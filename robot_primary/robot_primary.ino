@@ -34,13 +34,18 @@
 #define LAUNCHER_DIR_PIN_1 25 // IN1
 #define LAUNCHER_DIR_PIN_2 24 // IN2
 
-#define LAUNCHER_SPEED 84 // 77
+#define LAUNCHER_SPEED_ORANGE 83 // 84
+#define LAUNCHER_SPEED_GREEN 83 // 84
 
 #define DESTICKIFIER_SPEED_PIN 9 // ENB - PWM
 #define DESTICKIFIER_DIR_PIN_1 23 // IN3
 #define DESTICKIFIER_DIR_PIN_2 22 // IN4
 
 #define OPENING_SERVO_PIN 10
+
+#define TIGHTENING_SERVO_PIN 13
+#define TIGHTENING_SERVO_LOOSE 48
+#define TIGHTENING_SERVO_TAUGHT 12
 
 unsigned long START_TIME = 0;
 
@@ -78,6 +83,7 @@ LED greenLED(45);
 bool onOrangeSide = true;
 
 Servo *openingServo;
+Servo *stringServo;
 
 // updates the onOrangeSide variable based on the state of the side switch
 void setSide() {
@@ -129,6 +135,15 @@ void setupOpeningServo() {
   delay(50);
 }
 
+void setupStringServo() {
+  pinMode(TIGHTENING_SERVO_PIN, OUTPUT);
+
+  stringServo = new Servo();
+  stringServo->write(TIGHTENING_SERVO_LOOSE);
+  stringServo->attach(TIGHTENING_SERVO_PIN);
+  delay(50);
+}
+
 // set the spinning direction of the cable tie motor (note a value of true for `forward` doesn't necessarily push the balls forward)
 void setDestickifierDirection(bool forward) {
   digitalWrite(DESTICKIFIER_DIR_PIN_1, forward ? LOW : HIGH);
@@ -141,7 +156,7 @@ void setLauncherMotorSpin(bool spinning) {
     analogWrite(LAUNCHER_SPEED_PIN, 150);
     delay (150);
   }
-  analogWrite(LAUNCHER_SPEED_PIN, spinning ? LAUNCHER_SPEED : 0);
+  analogWrite(LAUNCHER_SPEED_PIN, spinning ? (onOrangeSide ? LAUNCHER_SPEED_ORANGE : LAUNCHER_SPEED_GREEN) : 0);
   delay(200);
 }
 
@@ -167,6 +182,16 @@ void openServo() {
 // move the top servo to the closed position (curved part over the ball entrance) (use let balls out of tube)
 void closeServo() {
   openingServo->write(180);
+  delay(1000);
+}
+
+void loosenString() {
+  stringServo->write(TIGHTENING_SERVO_LOOSE);
+  delay(1000);
+}
+
+void tightenString() {
+  stringServo->write(TIGHTENING_SERVO_TAUGHT);
   delay(1000);
 }
 
@@ -202,6 +227,7 @@ void beginLaunching() {
 
   //setDestickifierMotorSpin(false);
   setLauncherMotorSpin(false);
+  setDestickifierMotorSpin(false);
 }
 
 // move forward by a distance in millimeters, `sense` will enable the ultrasonic sensors
@@ -234,6 +260,7 @@ void setup() {
   setupDestickifierMotorPins();
   setupStepperMotorPins();
   setupOpeningServo();
+  setupStringServo();
   
   driver.setup();
 
@@ -250,6 +277,13 @@ void setup() {
   setSide();
   while (!startButton.state()) {
     setSide();
+  }
+
+  setupLaunching();
+
+  while (true) {
+    beginLaunching();
+    START_TIME = millis();
   }
 
   if (START_TIME == 0)

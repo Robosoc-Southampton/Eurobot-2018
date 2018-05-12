@@ -116,6 +116,12 @@ void setup() {
 
   setSide();
 
+  while (true) moveForward(10000);
+
+  //while (true) {
+    //Serial.println(distanceSensor.getValue());
+  //}
+
   while (!startButton.state()) {
     setSide();
   }
