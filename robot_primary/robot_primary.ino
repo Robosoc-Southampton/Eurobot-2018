@@ -28,14 +28,14 @@
 #define pin2 31
 #define pin3 32
 #define pin4 33
-#define delaytime 4
+#define delaytime 5
 
 #define LAUNCHER_SPEED_PIN 8 // ENA - PWM
 #define LAUNCHER_DIR_PIN_1 25 // IN1
 #define LAUNCHER_DIR_PIN_2 24 // IN2
 
-#define LAUNCHER_SPEED_ORANGE 83 // 84
-#define LAUNCHER_SPEED_GREEN 83 // 84
+#define LAUNCHER_SPEED_ORANGE 82 // 84
+#define LAUNCHER_SPEED_GREEN 82 // 84
 
 #define DESTICKIFIER_SPEED_PIN 9 // ENB - PWM
 #define DESTICKIFIER_DIR_PIN_1 23 // IN3
@@ -185,14 +185,22 @@ void closeServo() {
   delay(1000);
 }
 
-void loosenString() {
+void loosenStringAsync() {
   stringServo->write(TIGHTENING_SERVO_LOOSE);
-  delay(1000);
+}
+
+void tightenStringAsync() {
+  stringServo->write(TIGHTENING_SERVO_TAUGHT);
+}
+
+void loosenString() {
+  loosenStringAsync();
+  delay(300);
 }
 
 void tightenString() {
-  stringServo->write(TIGHTENING_SERVO_TAUGHT);
-  delay(1000);
+  tightenStringAsync();
+  delay(300);
 }
 
 // move top servo back and forth around the area at which it opens the ball tube
@@ -220,7 +228,26 @@ void beginLaunching() {
   for (int i = 0; true; ++i) {
     if (millis() - START_TIME >= 84000) break;
     setDestickifierMotorSpin(i % 2 == 0);
-    setDestickifierDirection(i % 4 == 0);
+
+    if (i % 4 != 0) {
+      setDestickifierDirection(false);
+      delay(400);
+      setDestickifierMotorSpin(false);
+    }
+    else {
+      setDestickifierDirection(true);
+    }
+    
+    setDestickifierDirection(i % 4 != 0);
+    if (i == 4 || i > 4 && i % 3 == 0 && millis() - START_TIME <= 80000) {
+      loosenString();
+      tightenString();
+      loosenString();
+      tightenString();
+      loosenString();
+      delay(500);
+      tightenString();
+    }
     spinStepperMotor();
     delay(100);
   }
@@ -236,7 +263,7 @@ void moveForward(int distance, bool sense = true) {
   unsigned long start_time = millis();
   
   while (true) {
-    int distanceMoved = driver.forward(distance, timeout < 5000 ? timeout : 5000, sense);
+    int distanceMoved = driver.forward(distance, timeout < 5000 ? timeout : 4000, sense);
     unsigned long dt = millis() - start_time;
  
     start_time = millis();
@@ -270,20 +297,13 @@ void setup() {
     Serial.print(sensor3.getValue());
     Serial.print(", ");
     Serial.print(sensor1.getValue());
-    Serial.print(", ");
+    Serial.print(", ");tky 
     Serial.println(sensor4.getValue());
   }*/
 
   setSide();
   while (!startButton.state()) {
     setSide();
-  }
-
-  setupLaunching();
-
-  while (true) {
-    beginLaunching();
-    START_TIME = millis();
   }
 
   if (START_TIME == 0)
@@ -298,11 +318,13 @@ void loop() {
   moveForward(-125, false); // ultrasonic sensing turned off to avoid detecting the side board and stopping
   //
   // get balls into robot
-  
+
+  loosenStringAsync();
   closeServo();
   delay(1000);
   jiggle();
   delay(500);
+  tightenStringAsync();
   //
   // move into launching position
   
@@ -311,6 +333,7 @@ void loop() {
   setupLaunching();
   
   driver.turnAtSpot(onOrangeSide ? 90 : -97);
+  delay(500);
   //moveForward(50);
   //moveForward(200);
   //

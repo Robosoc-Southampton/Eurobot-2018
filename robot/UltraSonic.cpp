@@ -11,10 +11,18 @@ UltraSonic::UltraSonic(int triggerPin, int echoPin) {
 }
 
 void UltraSonic::fillLastValues() {
-	while (readings < MAX_VALUES) getValue();
+  int i = 0;
+	while (i < MAX_VALUES) {
+	  lastValues[i++] = getValue();
+    readings = i;
+	}
 }
 
 float UltraSonic::getValue() {
+  long time = millis();
+
+  if (time - lastTime < 64) return lastValue;
+  
 	long duration;
 	float distance;
 	digitalWrite(triggerPin, LOW);
@@ -30,6 +38,8 @@ float UltraSonic::getValue() {
 
 	// record value
 	lastValues[(readings++) % MAX_VALUES] = distance;
+  lastValue = distance;
+  lastTime = time;
 
 	return distance;
 }

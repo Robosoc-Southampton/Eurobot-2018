@@ -103,7 +103,12 @@ void alignToWall(int distance) {
 void setup() {
   Serial.begin(9600);
 
+  Serial.println("setup starting");
+
   driver.setup(); // start I2C, setup MD25 to mode 0
+
+  Serial.println("driver setup done");
+  
   pinMode(10, OUTPUT);
   beePushingArmServo = new Servo();
   beePushingArmServo->write(0);
@@ -115,12 +120,6 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
 
   setSide();
-
-  while (true) moveForward(10000);
-
-  //while (true) {
-    //Serial.println(distanceSensor.getValue());
-  //}
 
   while (!startButton.state()) {
     setSide();
@@ -140,8 +139,8 @@ void loop() {
     driver.turnAtSpot(-135);
     moveForward(-150);
     alignToWall(-500);
-    moveForward(90);
-    driver.turnAtSpot(-90);
+    moveForward(85);
+    driver.turnAtSpot(-87);
     moveForward(-300);
     alignToWall(-200);
     lowerBeePushingArm();
@@ -169,7 +168,7 @@ void loop() {
     driver.turnAtSpot(135);
     moveForward(-150);
     alignToWall(-500);
-    moveForward(90);
+    moveForward(85);
     driver.turnAtSpot(-90);
     moveForward(150);
     alignToWall(300);

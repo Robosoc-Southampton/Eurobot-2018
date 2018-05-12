@@ -47,10 +47,10 @@ int Driver::forward(int dist, long timeout, bool sense) {
   do {
     if (sense) sensors[0].getValue();
     if (sense) sensors[1].getValue();
-    if (sense) sensors[2].getValue();
+    //if (sense) sensors[2].getValue();
 
     
-    if (sense && dist < 0 && (sensors[1].allBelowThreshold(PROXIMITY_THRESHOLD) || sensors[2].allBelowThreshold(PROXIMITY_THRESHOLD))) {
+    if (sense && dist < 0 && (sensors[1].allBelowThreshold(PROXIMITY_THRESHOLD) /*|| sensors[2].allBelowThreshold(PROXIMITY_THRESHOLD)*/)) {
       md->stopMotors();
       delay(250);
       return getDistance(md->encoder1());

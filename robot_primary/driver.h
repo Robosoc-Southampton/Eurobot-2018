@@ -31,7 +31,7 @@ public:
 	int forward(int dist, long timeout=5000, bool sense = true); // drives forward using PID and help functions below
 	// unsafe (won't stop using ultrasonic sensors):
 	int forwardUntilLine(PololuQTRSensors sensor, long timeout=5000); // drives forward until hitting a line
-	void turnAtSpot(float angle, long timeout=5000); // turns at spot until it reaches required angle (positive clockwise) using PID and help functions
+	void turnAtSpot(float angle, long timeout=4000); // turns at spot until it reaches required angle (positive clockwise) using PID and help functions
 	void turn(int rad, int angle, char side, long timeout=5000); // drives on arc with specified parametres
 
 	bool senseLine(PololuQTRSensors sensor); // returns true if the line sensor detects a line
